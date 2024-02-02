@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # cockroachai-web-code
 
 - 这是cockroachai-web项目的源代码（后台管理面板部分）
@@ -9,4 +10,3 @@
 ## 许可证
 
 - 本项目采用GNU通用公共许可证v3.0发布，详情请参见[LICENSE]()文件。
-
