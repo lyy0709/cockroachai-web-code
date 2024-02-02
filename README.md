@@ -9,4 +9,4 @@
 
 ## 许可证
 
-- 本项目采用GNU通用公共许可证v3.0发布，详情请参见[LICENSE]()文件。
+- 本项目采用GNU通用公共许可证v3.0发布，详情请参见[LICENSE](https://github.com/lyy0709/cockroachai-web-code/blob/main/LICENSE)文件。
