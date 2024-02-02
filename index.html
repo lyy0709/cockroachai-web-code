@@ -1,0 +1,267 @@
+/*<cockroachai-web-code>
+版权所有 (C) <2024> <lyy0709>
+
+本程序是自由软件：您可以根据自由软件基金会发布的GNU通用公共许可证条款，对其进行重新分配和/或修改，无论是其第3版，还是（根据您的选择）任何后续版本。
+
+本程序是在希望能有用的前提下发布的，但不提供任何保证；甚至没有适销性和特定用途适用性的隐含保证。有关更多详情，请参阅GNU通用公共许可证。
+
+您应该已经收到一份GNU通用公共许可证的副本以及本程序。如果没有，请参见 <https://www.gnu.org/licenses/>。*/
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input[type="password"],
+        input[type="text"] {
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            /* Added to fix padding issue */
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        #tokenManagementSection {
+            display: none;
+            /* Keeps token management hidden initially */
+            margin-top: 30px;
+        }
+
+        #tokenList {
+            width: 100%;
+            /* 确保列表占满整个容器宽度 */
+            padding: 0;
+            /* 移除列表的内边距 */
+            list-style-type: none;
+            /* 移除列表项的默认样式 */
+        }
+
+        #tokenList li {
+            width: 100%;
+            /* 确保列表项占满整个列表宽度 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            /* 调整为所需的内边距，这里只设置了垂直方向的内边距 */
+        }
+
+        .token-text {
+            /* 保持Token文本与左侧对齐 */
+            text-align: left;
+            flex-grow: 1;
+        }
+
+        .delete-btn {
+            /* 将删除按钮推到右侧 */
+            margin-left: 20px;
+            /* 为文本和按钮之间提供一些空间 */
+            padding: 5px 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .container,
+        #tokenManagementSection {
+            width: 300px;
+            /* Updated width */
+            margin: 20px auto;
+            /* Centering and adding vertical spacing */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        #refreshCookieSection {
+            text-align: center;
+            /* Center aligns the inline-elements like text and inline-blocks */
+            padding: 10px 0;
+            /* Optional padding for better spacing */
+        }
+
+        #refreshCookieSection .switch,
+        #refreshCookieSection input,
+        #refreshCookieSection button {
+            margin: 10px auto;
+            /* Centers the block elements inside the refreshCookieSection */
+            display: block;
+            /* Makes sure elements take the full width available */
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-bottom: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        /* When the switch is checked (enabled), add a green background */
+        input:checked+.slider {
+            background-color: #28a745;
+            /* Green color */
+        }
+
+        /* When the switch is not checked (disabled), add a red background */
+        input:not(:checked)+.slider {
+            background-color: #dc3545;
+            /* Red color */
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+            /* Handle position when checked */
+        }
+
+        #refreshCookieSection input[type="text"],
+        #refreshCookieSection button {
+            width: calc(100% - 30px);
+            /* Adjust width with padding */
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #refreshCookieSection button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #refreshCookieSection button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loginSection" class="container">
+        <h2>Admin Login</h2>
+        <form id="loginForm">
+            <label for="password">Password:</label>
+            <br>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <div id="error" style="color: red; display: none;"></div> <!-- 错误消息显示区域 -->
+            <br>
+            <input type="submit" value="Login">
+        </form>
+    </div>
+    <div id="tokenManagementSection" class="container">
+        <h2>User Tokens</h2>
+        <form id="addTokenForm">
+            <input type="text" id="newToken" name="newToken" placeholder="Enter new token" required>
+            <input type="submit" value="Add Token">
+        </form>
+        <ul id="tokenList">
+            <!-- Token items will be dynamically added here -->
+        </ul>
+
+        <div id="refreshCookieSection">
+            <h3 style="color: #333; text-align: center;">Manage REFRESHCOOKIE</h3>
+            <label class="switch">
+                <input type="checkbox" id="refreshCookieEnabled">
+                <span class="slider round"></span>
+            </label>
+            <input type="text" id="refreshCookieValue" placeholder="Enter REFRESHCOOKIE value" disabled>
+            <button id="updateRefreshCookie">Update</button>
+	    <button id="getSessionButton">Get Session</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>
