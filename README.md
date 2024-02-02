@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # cockroachai-web-code
 
 - 这是cockroachai-web项目的源代码（后台管理面板部分）
