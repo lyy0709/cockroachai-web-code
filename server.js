@@ -127,7 +127,7 @@ app.post('/api/refresh-cookie', (req, res) => {
     }
 
     // 根据开关状态更新REFRESHCOOKIE
-    config.REFRESHCOOKIE = enabled ? value : "";
+    config.REFRESHCOOKIE = enabled ? `"${value}"` : "";
 
     saveConfig(config); // 保存更新后的配置
 
