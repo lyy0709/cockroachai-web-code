@@ -38,12 +38,12 @@ document.addEventListener("DOMContentLoaded", function() {
                     loadTokens(); // 加载并显示Token
                 } else {
                     // 密码错误，显示错误消息并清空密码输入框
-                    showError('Password is incorrect');
+                    showError('密码错误');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showError('An error occurred while validating password');
+                showError('验证密码时发生错误');
             });
     });
 
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .catch(error => {
                 console.error('Error:', error);
-                showError('Failed to fetch tokens');
+                showError('获取令牌失败');
             });
     }
 
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .catch(error => {
                 console.error('Error:', error);
-                showError('Failed to add token');
+                showError('添加令牌失败');
             });
     });
 
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         if (response.ok) {
                             li.remove(); // 从列表中移除该Token
                         } else {
-                            console.error('Failed to delete token');
+                            console.error('删除令牌失败');
                         }
                     });
             };
@@ -117,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function() {
             tokenList.appendChild(li); // 将列表项添加到Token列表中
         });
     }
-
 
     function showError(message) {
         errorDiv.textContent = message; // 设置错误消息
@@ -128,6 +127,23 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('getSessionButton').addEventListener('click', function() {
         window.location.href = 'http://' + window.location.hostname + ':9000/getsession';
     });
+        document.getElementById('restartContainer').addEventListener('click', function(){
+            var containerName = document.getElementById('containerName').value;
+            fetch('/api/recreate-and-start-container', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ containerName: containerName }),
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
 
     // 从localStorage加载状态
     const savedEnabled = localStorage.getItem('refreshCookieEnabled') === 'true';
@@ -181,14 +197,14 @@ document.getElementById('updateRefreshCookie').addEventListener('click', functio
         })
         .then(response => {
             if (response.ok) {
-                alert('REFRESHCOOKIE update successfully');
+                alert('REFRESHCOOKIE 更新成功');
             } else {
                 response.text().then(text => showError(text));
             }
         })
         .catch(error => {
             console.error('error:', error);
-            showError('update REFRESHCOOKIE fail');
+            showError('REFRESHCOOKIE 更新失败');
         });
 });
 
