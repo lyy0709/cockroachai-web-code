@@ -6,12 +6,16 @@
 本程序是在希望能有用的前提下发布的，但不提供任何保证；甚至没有适销性和特定用途适用性的隐含保证。有关更多详情，请参阅GNU通用公共许可证。
 
 您应该已经收到一份GNU通用公共许可证的副本以及本程序。如果没有，请参见 <https://www.gnu.org/licenses/>。*/
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const app = express();
 const port = 8999;
+const Docker = require('dockerode');
+const docker = new Docker({ socketPath: '/var/run/docker.sock' });
+
 
 app.use(bodyParser.json());
 app.use(express.static('/usr/src/app'));
@@ -127,11 +131,67 @@ app.post('/api/refresh-cookie', (req, res) => {
     }
 
     // 根据开关状态更新REFRESHCOOKIE
-    config.REFRESHCOOKIE = enabled ? `"${value}"` : "";
+    config.REFRESHCOOKIE = enabled ? value : "";
 
     saveConfig(config); // 保存更新后的配置
 
     res.send('REFRESHCOOKIE updated successfully');
+});
+
+app.post('/api/recreate-and-start-container', async (req, res) => {
+	    // 从请求体中获取容器名称
+    const containerName = req.body.containerName;
+    if (!containerName) {
+        return res.status(400).send('Container name is required');
+    }
+    const imageName = 'xyhelper/cockroachai:latest'; // 镜像名称
+
+    // 将 docker-compose.yml 中的配置转换为 dockerode 可接受的格式
+    const containerOptions = {
+        Image: imageName,
+        name: containerName,
+        ExposedPorts: {
+            '9000/tcp': {} // 指示 Docker 容器内的 9000 端口应该被暴露
+        },
+        HostConfig: {
+            PortBindings: { 
+                '9000/tcp': [{ HostPort: '9000' }] // 将宿主机的 9000 端口绑定到容器的 9000 端口
+            },
+            Binds: [
+                '/home/cockroachai/config:/app/config' // 将宿主机的目录绑定到容器内的目录
+            ]
+        },
+        Env: [
+            'ASSET_PREFIX=https://oaistatic-cdn.closeai.biz' // 设置环境变量
+        ]
+    };
+    try {
+        // 尝试获取容器，如果存在则停止并删除
+        const existingContainer = docker.getContainer(containerName);
+        await existingContainer.stop();
+        await existingContainer.remove();
+    } catch (err) {
+        if (err.statusCode !== 404) { // 忽略未找到容器的错误
+            console.error(`Error stopping/removing container ${containerName}:`, err);
+            return res.status(500).send(`Error stopping/removing container: ${err.message}`);
+        }
+    }
+
+    // 创建并启动新容器
+    docker.createContainer(containerOptions, (err, container) => {
+        if (err) {
+            console.error(`Error creating container from image ${imageName}:`, err);
+            return res.status(500).send(`Error creating container: ${err.message}`);
+        }
+
+        container.start((err, data) => {
+            if (err) {
+                console.error(`Error starting container ${containerName}:`, err);
+                return res.status(500).send(`Error starting container: ${err.message}`);
+            }
+            res.send(`Container ${containerName} recreated and started successfully.`);
+        });
+    });
 });
 
 
